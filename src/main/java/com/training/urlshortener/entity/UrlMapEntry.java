@@ -1,19 +1,19 @@
 package com.training.urlshortener.entity;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Getter
 @Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "url_map_entry")
+@Document(collection = "urlMap")
 public class UrlMapEntry {
     @Id
-    @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private String id;
 
     private String longUrl;
