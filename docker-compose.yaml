@@ -1,0 +1,69 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: persistent_store
+    environment:
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: [
+        "CMD",
+        "mongosh",
+        "--username",
+        "${DB_USERNAME}",
+        "--password",
+        "${DB_PASSWORD}",
+        "--authenticationDatabase",
+        "admin",
+        "--eval",
+        "db.adminCommand('ping').ok",
+        "--quiet"
+      ]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  redis:
+    image: redis:latest
+    container_name: cache
+    command: [ "redis-server", "--requirepass", "${CACHE_PASSWORD}", "--appendonly", "yes" ]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${CACHE_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  # Service 2: Your Spring Boot App
+  spring-app:
+    build: .
+    container_name: url_shortener
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongodb:27017/${DB_NAME}?authSource=admin
+    depends_on:
+      - mongodb
+      - redis
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
