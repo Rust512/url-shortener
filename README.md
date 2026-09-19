@@ -22,14 +22,14 @@ The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirectio
 * **FR-1: Shorten URL (`POST /api/v1/shorten`)**
 * Accepts a payload containing a target `longUrl`.
 * Validates URL safety and structural integrity.
-* Generates a cryptographically secure, unique 6–8 character Base62 short code.
-* Persists the mapping in PostgreSQL and writes it to Redis with an explicit TTL.
+* Generates a cryptographically secure, unique 8 character Nano ID.
+* Persists the mapping in MongoDB and writes it to Redis with an explicit TTL.
 
 
 * **FR-2: Redirect URL (`GET /{shortCode}`)**
 * Checks Redis for the provided `shortCode`:
 * **Cache Hit:** Instantly returns an HTTP `302 Found` redirect to the `longUrl`.
-* **Cache Miss:** Queries PostgreSQL. If found, populates Redis and executes the redirect; otherwise, returns HTTP `404 Not Found`.
+* **Cache Miss:** Queries MongoDB. If found, populates Redis and executes the redirect; otherwise, returns HTTP `404 Not Found`.
 
 
 
@@ -77,5 +77,5 @@ The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirectio
 
 * **Language & Runtime:** Java 25 / Spring Boot 4
 * **In-Memory Cache & Rate Limiter:** Redis 7+
-* **Persistent Database:** PostgreSQL 16+
+* **Persistent Database:** MongoDB version 8.3.11
 * **Integration Testing:** JUnit 5, MockMvc, Testcontainers
