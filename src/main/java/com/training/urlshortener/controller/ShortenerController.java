@@ -17,7 +17,7 @@ public class ShortenerController {
 
     private final UrlService urlService;
 
-    @Cacheable
+    @Cacheable(value = "urls", key = "#id")
     @GetMapping(path = "/{id}")
     ResponseEntity<Void> redirect(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.FOUND)
