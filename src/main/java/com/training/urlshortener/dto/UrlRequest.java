@@ -1,4 +1,18 @@
 package com.training.urlshortener.dto;
 
-public record UrlRequest() {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.URL;
+
+import java.net.URI;
+
+public record UrlRequest(
+        @URL
+        @NotBlank(message = "The URL cannot be blank")
+        @Size(max = 2048, message = "The URL cannot exceed 2048 characters")
+        String url
+) {
+    public URI toUri() {
+        return URI.create(url);
+    }
 }
