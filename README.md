@@ -9,7 +9,7 @@ Build a high-performance, resilient RESTful URL shortener to master distributed 
 ## 2. Architecture Overview
 
 ```text
-Client ──► Rate Limiter ──► API Layer ──► Redis Cache ──► PostgreSQL DB
+Client ──► Rate Limiter ──► API Layer ──► Redis Cache ──► Mongo DB
 
 ```
 
