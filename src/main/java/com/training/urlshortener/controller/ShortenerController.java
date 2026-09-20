@@ -4,6 +4,7 @@ import com.training.urlshortener.dto.UrlRequest;
 import com.training.urlshortener.dto.UrlResponse;
 import com.training.urlshortener.service.UrlService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class ShortenerController {
     }
 
     @PostMapping(path = "/v1/api/shorten")
-    ResponseEntity<UrlResponse> getShortUrl(HttpServletRequest request, @RequestBody UrlRequest urlRequest) {
+    ResponseEntity<UrlResponse> getShortUrl(HttpServletRequest request, @Valid @RequestBody UrlRequest urlRequest) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(urlService.registerUrl(request, urlRequest.toUri()));
     }
