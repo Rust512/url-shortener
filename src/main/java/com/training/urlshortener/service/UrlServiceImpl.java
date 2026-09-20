@@ -1,11 +1,20 @@
 package com.training.urlshortener.service;
 
+import com.training.urlshortener.annotation.DynamicTtlCacheable;
+import com.training.urlshortener.entity.UrlMapEntry;
+import com.training.urlshortener.exception.SelfReferenceException;
 import com.training.urlshortener.repository.UrlRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.Strings;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.time.temporal.ChronoUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UrlServiceImpl implements UrlService {
@@ -13,7 +22,27 @@ public class UrlServiceImpl implements UrlService {
     private final UrlRepository urlRepository;
 
     @Override
+    @DynamicTtlCacheable(value = "url", key = "#id", ttl = 5L, timeUnit = ChronoUnit.MINUTES)
     public URI getLongUrl(String id) {
         return URI.create(urlRepository.getById(id).getLongUrl());
+    }
+
+    @Override
+    @DynamicTtlCacheable(value = "url", key = "#id", ttl = 10L, timeUnit = ChronoUnit.MINUTES)
+    public URI registerUrl(HttpServletRequest request, URI longUrl) {
+        String appHost = request.getServerName();
+        String urlHost = longUrl.getHost();
+
+        if (Strings.CI.equals(appHost, urlHost)) {
+            log.warn("URL registration failed; reason=app_referencing_url");
+            throw new SelfReferenceException();
+        }
+
+        UrlMapEntry savedEntry = urlRepository.saveLongUrl(longUrl.toString());
+
+        String scheme = request.getScheme();
+        int port = request.getServerPort();
+
+        return URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, savedEntry.getId()));
     }
 }
