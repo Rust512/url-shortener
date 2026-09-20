@@ -1,4 +1,9 @@
 package com.training.urlshortener.dto;
 
-public record UrlResponse() {
+import java.net.URI;
+
+public record UrlResponse(
+        URI longUrl,
+        URI shortUrl
+) {
 }
