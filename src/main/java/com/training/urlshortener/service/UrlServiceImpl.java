@@ -3,6 +3,7 @@ package com.training.urlshortener.service;
 import com.training.urlshortener.annotation.DynamicTtlCacheable;
 import com.training.urlshortener.dto.UrlResponse;
 import com.training.urlshortener.entity.UrlMapEntry;
+import com.training.urlshortener.exception.MissingEntryException;
 import com.training.urlshortener.exception.SelfReferenceException;
 import com.training.urlshortener.repository.UrlRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,13 @@ public class UrlServiceImpl implements UrlService {
     @Override
     @DynamicTtlCacheable(value = "url", key = "#id", ttl = 5L, timeUnit = ChronoUnit.MINUTES)
     public URI getLongUrl(String id) {
-        return URI.create(urlRepository.getById(id).getLongUrl());
+        var entry = urlRepository.getById(id);
+        if (entry == null) {
+            log.warn("URL fetch failed; reason=id_does_not_exist");
+            throw new MissingEntryException(id);
+        }
+
+        return URI.create(entry.getLongUrl());
     }
 
     @Override
