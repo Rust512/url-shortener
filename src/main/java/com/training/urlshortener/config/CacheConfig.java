@@ -1,6 +1,7 @@
 package com.training.urlshortener.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,6 +15,7 @@ public class CacheConfig {
 
     private final ObjectMapper objectMapper;
 
+    @Bean
     public RedisTemplate<String, Object> cacheRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
 
