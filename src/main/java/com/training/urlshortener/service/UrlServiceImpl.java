@@ -1,6 +1,7 @@
 package com.training.urlshortener.service;
 
 import com.training.urlshortener.annotation.DynamicTtlCacheable;
+import com.training.urlshortener.dto.UrlResponse;
 import com.training.urlshortener.entity.UrlMapEntry;
 import com.training.urlshortener.exception.SelfReferenceException;
 import com.training.urlshortener.repository.UrlRepository;
@@ -8,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -29,7 +29,7 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @DynamicTtlCacheable(value = "url", key = "#id", ttl = 10L, timeUnit = ChronoUnit.MINUTES)
-    public URI registerUrl(HttpServletRequest request, URI longUrl) {
+    public UrlResponse registerUrl(HttpServletRequest request, URI longUrl) {
         String appHost = request.getServerName();
         String urlHost = longUrl.getHost();
 
@@ -43,6 +43,7 @@ public class UrlServiceImpl implements UrlService {
         String scheme = request.getScheme();
         int port = request.getServerPort();
 
-        return URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, savedEntry.getId()));
+        var shortUrl = URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, savedEntry.getId()));
+        return new UrlResponse(longUrl, shortUrl);
     }
 }
