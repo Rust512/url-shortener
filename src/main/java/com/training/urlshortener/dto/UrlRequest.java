@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.URL;
 import java.net.URI;
 
 public record UrlRequest(
-        @URL
+        @URL(message = "The URL should be valid")
         @NotBlank(message = "The URL cannot be blank")
         @Size(max = 2048, message = "The URL cannot exceed 2048 characters")
         String url
