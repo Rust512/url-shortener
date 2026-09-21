@@ -1,5 +1,6 @@
 package com.training.urlshortener.controller;
 
+import com.training.urlshortener.constant.RequestExamples;
 import com.training.urlshortener.constant.ResponseExamples;
 import com.training.urlshortener.dto.ApiErrorResponse;
 import com.training.urlshortener.dto.UrlRequest;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +47,14 @@ public class ShortenerController {
                     examples = @ExampleObject(value = ResponseExamples.MISSING_URL)
             )
     )
+    @ApiResponse(
+            responseCode = "400",
+            description = "URL ID should be 7-character long",
+            content = @Content(
+                    schema = @Schema(implementation = ApiErrorResponse.class),
+                    examples = @ExampleObject(value = ResponseExamples.URL_ID_LENGTH_CONSTRAINT)
+            )
+    )
     ResponseEntity<Void> redirect(
             @PathVariable
             @Size(min = 7, max = 7, message = "The URL ID should be 7-character long")
@@ -60,6 +70,50 @@ public class ShortenerController {
     }
 
     @PostMapping(path = "/v1/api/shorten")
+    @Operation(
+            summary = "Shorten a URL",
+            description = """
+                    Use this API to shorten a long URL
+                    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(value = RequestExamples.REGISTER_URL_REQUEST)
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "URL registered successfully",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = ResponseExamples.URL_REGISTERED)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "URL cannot be blank",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = ResponseExamples.URL_CANNOT_BE_BLANK)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "URL should be valid",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = ResponseExamples.URL_SHOULD_BE_VALID)
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "URL cannot exceed 2048 characters",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = ResponseExamples.URL_CANNOT_EXCEED_2048_CHARS)
+            )
+    )
     ResponseEntity<UrlResponse> getShortUrl(HttpServletRequest request, @Valid @RequestBody UrlRequest urlRequest) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(urlService.registerUrl(request, urlRequest.toUri()));
