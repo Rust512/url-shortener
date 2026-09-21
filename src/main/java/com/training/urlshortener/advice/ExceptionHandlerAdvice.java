@@ -16,10 +16,14 @@ public class ExceptionHandlerAdvice {
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
             HandlerMethodValidationException.class,
-            MissingEntryException.class
     })
     ResponseEntity<ApiErrorResponse> handleBadRequest(Exception ex, HttpServletRequest request) {
         return ErrorMessageFactory.getApiErrorResponseEntity(ex, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(MissingEntryException.class)
+    ResponseEntity<ApiErrorResponse> handleMissingEntryException(MissingEntryException ex, HttpServletRequest request) {
+        return ErrorMessageFactory.getApiErrorResponseEntity(ex, HttpStatus.NOT_FOUND, request);
     }
 
     @ExceptionHandler(Exception.class)
