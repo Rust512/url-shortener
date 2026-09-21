@@ -8,8 +8,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import java.net.URI;
-
 @Repository
 @RequiredArgsConstructor
 public class UrlRepositoryImpl implements UrlRepository {
@@ -25,7 +23,7 @@ public class UrlRepositoryImpl implements UrlRepository {
         String id;
 
         do {
-            id = NanoIdUtils.randomNanoId();
+            id = NanoIdUtils.randomNanoId(NanoIdUtils.DEFAULT_NUMBER_GENERATOR, NanoIdUtils.DEFAULT_ALPHABET, 7);
         } while (idUsed(id));
 
         var entry = UrlMapEntry.builder()
