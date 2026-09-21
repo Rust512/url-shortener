@@ -43,6 +43,7 @@ public class ShortenerController {
             responseCode = "404",
             description = "Registered URL not found",
             content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiErrorResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.MISSING_URL)
             )
@@ -51,6 +52,7 @@ public class ShortenerController {
             responseCode = "400",
             description = "URL ID should be 7-character long",
             content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ApiErrorResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.URL_ID_LENGTH_CONSTRAINT)
             )
@@ -78,6 +80,7 @@ public class ShortenerController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UrlRequest.class),
                             examples = @ExampleObject(value = RequestExamples.REGISTER_URL_REQUEST)
                     )
             )
@@ -87,6 +90,7 @@ public class ShortenerController {
             description = "URL registered successfully",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = UrlResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.URL_REGISTERED)
             )
     )
@@ -95,6 +99,7 @@ public class ShortenerController {
             description = "URL cannot be blank",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiErrorResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.URL_CANNOT_BE_BLANK)
             )
     )
@@ -103,6 +108,7 @@ public class ShortenerController {
             description = "URL should be valid",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiErrorResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.URL_SHOULD_BE_VALID)
             )
     )
@@ -111,6 +117,7 @@ public class ShortenerController {
             description = "URL cannot exceed 2048 characters",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiErrorResponse.class),
                     examples = @ExampleObject(value = ResponseExamples.URL_CANNOT_EXCEED_2048_CHARS)
             )
     )
