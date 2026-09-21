@@ -9,9 +9,9 @@ RUN mvn clean package -Pdocker -DskipTests=true
 
 FROM eclipse-temurin:25-jre-alpine
 
-RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
+RUN addgroup -S nonroot && adduser -S apprunner -G nonroot
 
-USER nonroot
+USER apprunner
 
 WORKDIR /app
 
