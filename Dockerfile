@@ -8,6 +8,11 @@ COPY src ./src
 RUN mvn clean package -Pdocker -DskipTests=true
 
 FROM eclipse-temurin:25-jre-alpine
+
+RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
+
+USER nonroot
+
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar app.jar
