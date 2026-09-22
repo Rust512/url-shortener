@@ -34,7 +34,7 @@ services:
   redis:
     image: redis:latest
     container_name: cache
-    command: [ "redis-server", "--requirepass", "${CACHE_PASSWORD}", "--appendonly", "yes" ]
+    command: redis-server --requirepass ${CACHE_PASSWORD} --user default on nopass +@all +HELLO ~* &* --appendonly yes
     ports:
       - "6379:6379"
     healthcheck:
@@ -48,7 +48,6 @@ services:
     networks:
       - app-network
 
-  # Service 2: Your Spring Boot App
   spring-app:
     build: .
     container_name: url_shortener
@@ -56,6 +55,11 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongodb:27017/${DB_NAME}?authSource=admin
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_USERNAME: default
+      SPRING_DATA_REDIS_PASSWORD: ${CACHE_PASSWORD}
+      SPRING_DATA_REDIS_DATABASE: 0
     depends_on:
       - mongodb
       - redis
