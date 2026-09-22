@@ -24,14 +24,14 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @DynamicTtlCacheable(value = "url", key = "#id", ttl = 5L, timeUnit = ChronoUnit.MINUTES)
-    public URI getLongUrl(String id) {
+    public UrlResponse getLongUrl(HttpServletRequest request, String id) {
         var entry = urlRepository.getById(id);
         if (entry == null) {
             log.warn("URL fetch failed; reason=id_does_not_exist");
             throw new MissingEntryException(id);
         }
 
-        return URI.create(entry.getLongUrl());
+        return new UrlResponse(entry.getLongUrl(), constructShortUrl(request, id));
     }
 
     @Override
@@ -47,10 +47,15 @@ public class UrlServiceImpl implements UrlService {
 
         UrlMapEntry savedEntry = urlRepository.saveLongUrl(longUrl.toString());
 
+        String id = savedEntry.getId();
+        return new UrlResponse(longUrl, constructShortUrl(request, id));
+    }
+
+    private URI constructShortUrl(HttpServletRequest request, String id) {
+        String appHost = request.getServerName();
         String scheme = request.getScheme();
         int port = request.getServerPort();
 
-        var shortUrl = URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, savedEntry.getId()));
-        return new UrlResponse(longUrl, shortUrl);
+        return URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, id));
     }
 }

@@ -64,10 +64,11 @@ public class ShortenerController {
                     description = "7-character long short URL ID",
                     example = "kl2c49e"
             )
-            String id
+            String id,
+            HttpServletRequest request
     ) {
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(urlService.getLongUrl(id))
+                .location(urlService.getLongUrl(request, id).shortUrl())
                 .build();
     }
 
