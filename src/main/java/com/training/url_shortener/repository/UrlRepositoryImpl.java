@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
+import java.net.URI;
+
 @Repository
 @RequiredArgsConstructor
 public class UrlRepositoryImpl implements UrlRepository {
@@ -28,7 +30,7 @@ public class UrlRepositoryImpl implements UrlRepository {
 
         var entry = UrlMapEntry.builder()
                 .id(id)
-                .longUrl(longUrl)
+                .longUrl(URI.create(longUrl))
                 .build();
 
         return mongoTemplate.save(entry);
