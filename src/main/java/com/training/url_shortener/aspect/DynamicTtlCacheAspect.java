@@ -10,7 +10,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -28,7 +27,7 @@ public class DynamicTtlCacheAspect {
     private static final ExpressionParser parser = new SpelExpressionParser();
     private static final ParameterNameDiscoverer nameDiscoverer = new StandardReflectionParameterNameDiscoverer();
 
-    @Around("@annotation(com.training.urlshortener.annotation.DynamicTtlCacheable)")
+    @Around("@annotation(dynamicTtlCacheable)")
     public Object handleCache(ProceedingJoinPoint joinPoint, DynamicTtlCacheable dynamicTtlCacheable) throws Throwable {
         var signature = (MethodSignature) joinPoint.getSignature();
         var method = signature.getMethod();
@@ -65,8 +64,8 @@ public class DynamicTtlCacheAspect {
             redisTemplate.opsForValue().set(
                     redisKey,
                     result,
-                    Expiration.from(Duration.of(dynamicTtlCacheable.ttl(),
-                            dynamicTtlCacheable.timeUnit()))
+                    Duration.of(dynamicTtlCacheable.ttl(),
+                            dynamicTtlCacheable.timeUnit())
             );
         }
 
