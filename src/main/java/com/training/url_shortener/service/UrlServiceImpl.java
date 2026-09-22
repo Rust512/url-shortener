@@ -31,11 +31,10 @@ public class UrlServiceImpl implements UrlService {
             throw new MissingEntryException(id);
         }
 
-        return new UrlResponse(entry.getLongUrl(), constructShortUrl(request, id));
+        return new UrlResponse(id, entry.getLongUrl(), constructShortUrl(request, id));
     }
 
     @Override
-    @DynamicTtlCacheable(value = "url", key = "#id", ttl = 10L, timeUnit = ChronoUnit.MINUTES)
     public UrlResponse registerUrl(HttpServletRequest request, URI longUrl) {
         String appHost = request.getServerName();
         String urlHost = longUrl.getHost();
@@ -48,7 +47,7 @@ public class UrlServiceImpl implements UrlService {
         UrlMapEntry savedEntry = urlRepository.saveLongUrl(longUrl.toString());
 
         String id = savedEntry.getId();
-        return new UrlResponse(longUrl, constructShortUrl(request, id));
+        return new UrlResponse(id, longUrl, constructShortUrl(request, id));
     }
 
     private URI constructShortUrl(HttpServletRequest request, String id) {
