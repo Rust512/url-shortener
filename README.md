@@ -2,7 +2,8 @@
 
 ## 1. Objective
 
-Build a high-performance, resilient RESTful URL shortener to master distributed caching, persistent storage, race condition management, and protection against common application security vulnerabilities.
+Build a high-performance, resilient RESTful URL shortener to master distributed caching, persistent storage, race
+condition management, and protection against common application security vulnerabilities.
 
 ---
 
@@ -13,7 +14,8 @@ Client ──► Rate Limiter ──► API Layer ──► Redis Cache ──�
 
 ```
 
-The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirection latency while ensuring zero data loss upon memory resets.
+The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirection latency while ensuring zero data loss
+upon memory resets.
 
 ---
 
@@ -29,15 +31,12 @@ The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirectio
 * **FR-2: Redirect URL (`GET /{shortCode}`)**
 * Checks Redis for the provided `shortCode`:
 * **Cache Hit:** Instantly returns an HTTP `302 Found` redirect to the `longUrl`.
-* **Cache Miss:** Queries MongoDB. If found, populates Redis and executes the redirect; otherwise, returns HTTP `404 Not Found`.
-
-
+* **Cache Miss:** Queries MongoDB. If found, populates Redis and executes the redirect; otherwise, returns HTTP
+  `404 Not Found`.
 
 
 * **FR-3: Cache-Aside Management**
 * Evicts or populates cache entries lazily based on lookup demand and configurable Time-To-Live (TTL) expiration rules.
-
-
 
 ---
 
@@ -50,18 +49,18 @@ The system follows a **Cache-Aside Architecture** to achieve sub-10ms redirectio
 
 
 * **SEC-2: Distributed Rate Limiting**
-* Applies a Redis-backed Token Bucket or Sliding Window algorithm per IP/Token (e.g., maximum 10 creation requests per minute).
+* Applies a Redis-backed Token Bucket or Sliding Window algorithm per IP/Token (e.g., maximum 10 creation requests per
+  minute).
 * Responds with HTTP `429 Too Many Requests` when limits are exceeded.
 
 
 * **SEC-3: Cache Penetration Defense**
-* Caches null or empty markers in Redis with a short TTL (e.g., 60 seconds) for non-existent short codes to prevent repeated database lookup attacks.
+* Caches null or empty markers in Redis with a short TTL (e.g., 60 seconds) for non-existent short codes to prevent
+  repeated database lookup attacks.
 
 
 * **SEC-4: Non-Sequential Code Generation**
 * Employs cryptographically secure random generators for code creation to block sequential enumeration and scraping.
-
-
 
 ---
 

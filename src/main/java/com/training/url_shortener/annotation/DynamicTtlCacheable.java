@@ -8,7 +8,10 @@ import java.time.temporal.ChronoUnit;
 @Documented
 public @interface DynamicTtlCacheable {
     String value();
+
     String key();
+
     long ttl();
+
     ChronoUnit timeUnit() default ChronoUnit.MINUTES;
 }
