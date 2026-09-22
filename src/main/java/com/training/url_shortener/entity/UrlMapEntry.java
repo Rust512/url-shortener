@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
+
+import java.net.URI;
 
 @Getter
 @Builder
@@ -16,5 +20,6 @@ public class UrlMapEntry {
     @Id
     private String id;
 
-    private String longUrl;
+    @Field(targetType = FieldType.STRING)
+    private URI longUrl;
 }
