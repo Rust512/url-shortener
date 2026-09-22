@@ -1,6 +1,7 @@
 package com.training.url_shortener.aspect;
 
 import com.training.url_shortener.annotation.DynamicTtlCacheable;
+import com.training.url_shortener.dto.UrlResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,7 +23,7 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 public class DynamicTtlCacheAspect {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, UrlResponse> redisTemplate;
 
     private static final ExpressionParser parser = new SpelExpressionParser();
     private static final ParameterNameDiscoverer nameDiscoverer = new StandardReflectionParameterNameDiscoverer();
@@ -50,7 +51,7 @@ public class DynamicTtlCacheAspect {
         var evaluatedKey = parser.parseExpression(dynamicTtlCacheable.key()).getValue(evaluationContext, String.class);
         String redisKey = String.format("%s::%s", dynamicTtlCacheable.value(), evaluatedKey);
 
-        Object cached = redisTemplate.opsForValue()
+        UrlResponse cached = redisTemplate.opsForValue()
                 .get(redisKey);
 
         if (cached != null) {
@@ -58,7 +59,7 @@ public class DynamicTtlCacheAspect {
             return cached;
         }
 
-        Object result = joinPoint.proceed();
+        UrlResponse result = (UrlResponse) joinPoint.proceed();
 
         if (result != null) {
             redisTemplate.opsForValue().set(
