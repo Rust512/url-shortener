@@ -63,6 +63,8 @@ services:
     depends_on:
       - mongodb
       - redis
+    networks:
+      - app-network
 
 volumes:
   mongodb_data:
