@@ -68,7 +68,7 @@ public class ShortenerController {
             HttpServletRequest request
     ) {
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(urlService.getLongUrl(request, id).shortUrl())
+                .location(urlService.getLongUrl(request, id).longUrl())
                 .build();
     }
 
