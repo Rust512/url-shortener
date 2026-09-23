@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 
 public interface UrlService {
-    UrlResponse getLongUrl(HttpServletRequest request, String id);
+    URI getLongUrl(String id);
 
     UrlResponse registerUrl(HttpServletRequest request, URI longUrl);
 }
