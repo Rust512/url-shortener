@@ -24,14 +24,14 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @DynamicTtlCacheable(value = "url", key = "#id", ttl = 5L, timeUnit = ChronoUnit.MINUTES)
-    public UrlResponse getLongUrl(HttpServletRequest request, String id) {
+    public URI getLongUrl(String id) {
         var entry = urlRepository.getById(id);
         if (entry == null) {
             log.warn("URL fetch failed; reason=id_does_not_exist");
             throw new MissingEntryException(id);
         }
 
-        return new UrlResponse(entry.getLongUrl(), constructShortUrl(request, id));
+        return entry.getLongUrl();
     }
 
     @Override
