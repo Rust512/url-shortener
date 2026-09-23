@@ -16,6 +16,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
 import java.time.Duration;
 
 @Slf4j
@@ -23,7 +24,7 @@ import java.time.Duration;
 @Component
 @RequiredArgsConstructor
 public class DynamicTtlCacheAspect {
-    private final RedisTemplate<String, UrlResponse> redisTemplate;
+    private final RedisTemplate<String, URI> redisTemplate;
 
     private static final ExpressionParser parser = new SpelExpressionParser();
     private static final ParameterNameDiscoverer nameDiscoverer = new StandardReflectionParameterNameDiscoverer();
@@ -51,7 +52,7 @@ public class DynamicTtlCacheAspect {
         var evaluatedKey = parser.parseExpression(dynamicTtlCacheable.key()).getValue(evaluationContext, String.class);
         String redisKey = String.format("%s::%s", dynamicTtlCacheable.value(), evaluatedKey);
 
-        UrlResponse cached = redisTemplate.opsForValue()
+        URI cached = redisTemplate.opsForValue()
                 .get(redisKey);
 
         if (cached != null) {
@@ -59,7 +60,7 @@ public class DynamicTtlCacheAspect {
             return cached;
         }
 
-        UrlResponse result = (UrlResponse) joinPoint.proceed();
+        URI result = (URI) joinPoint.proceed();
 
         if (result != null) {
             redisTemplate.opsForValue().set(
