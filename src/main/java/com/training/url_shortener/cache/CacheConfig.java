@@ -1,35 +1,32 @@
-package com.training.url_shortener.config;
+package com.training.url_shortener.cache;
 
+import com.training.url_shortener.config.RedisUriSerializer;
 import com.training.url_shortener.dto.UrlResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import tools.jackson.databind.ObjectMapper;
+
+import java.net.URI;
 
 @Configuration
 @RequiredArgsConstructor
 public class CacheConfig {
 
-    private final ObjectMapper objectMapper;
-
     @Bean
-    public RedisTemplate<String, UrlResponse> cacheRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, UrlResponse> template = new RedisTemplate<>();
+    RedisTemplate<String, URI> cacheRedisTemplate(RedisConnectionFactory connectionFactory, RedisUriSerializer redisUriSerializer) {
+        RedisTemplate<String, URI> template = new RedisTemplate<>();
 
         template.setConnectionFactory(connectionFactory);
 
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        JacksonJsonRedisSerializer<UrlResponse> jsonSerializer =
-                new JacksonJsonRedisSerializer<>(objectMapper, UrlResponse.class);
 
         template.setKeySerializer(stringSerializer);
-        template.setValueSerializer(jsonSerializer);
+        template.setValueSerializer(redisUriSerializer);
         template.setHashKeySerializer(stringSerializer);
-        template.setHashValueSerializer(jsonSerializer);
+        template.setHashValueSerializer(redisUriSerializer);
         template.afterPropertiesSet();
 
         return template;
