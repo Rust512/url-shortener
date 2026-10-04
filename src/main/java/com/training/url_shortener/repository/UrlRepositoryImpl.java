@@ -3,6 +3,8 @@ package com.training.url_shortener.repository;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.training.url_shortener.entity.UrlMapEntry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,11 +18,13 @@ public class UrlRepositoryImpl implements UrlRepository {
     private final MongoTemplate mongoTemplate;
 
     @Override
+    @Cacheable(value = "urls", key = "#id")
     public UrlMapEntry getById(String id) {
         return mongoTemplate.findById(id, UrlMapEntry.class);
     }
 
     @Override
+    @CachePut(value = "urls", key = "#result.id")
     public UrlMapEntry saveLongUrl(String longUrl) {
         String id;
 

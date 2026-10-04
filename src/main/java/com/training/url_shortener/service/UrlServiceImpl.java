@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -22,7 +21,6 @@ public class UrlServiceImpl implements UrlService {
     private final UrlRepository urlRepository;
 
     @Override
-    @Cacheable(value = "urls", key = "#id")
     public URI getLongUrl(String id) {
         log.debug("URL fetch; id={}", id);
         var entry = urlRepository.getById(id);
