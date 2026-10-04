@@ -1,6 +1,5 @@
 package com.training.url_shortener.service;
 
-import com.training.url_shortener.annotation.DynamicTtlCacheable;
 import com.training.url_shortener.dto.UrlResponse;
 import com.training.url_shortener.entity.UrlMapEntry;
 import com.training.url_shortener.exception.MissingEntryException;
@@ -10,10 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -23,8 +22,9 @@ public class UrlServiceImpl implements UrlService {
     private final UrlRepository urlRepository;
 
     @Override
-    @DynamicTtlCacheable(value = "url", key = "#id", ttl = 5L, timeUnit = ChronoUnit.MINUTES)
+    @Cacheable(value = "urls", key = "#id")
     public URI getLongUrl(String id) {
+        log.debug("URL fetch; id={}", id);
         var entry = urlRepository.getById(id);
         if (entry == null) {
             log.warn("URL fetch failed; reason=id_does_not_exist");
