@@ -18,7 +18,7 @@ public class CacheConfig {
                 .entryTtl(Duration.ofMinutes(5L))
                 .disableCachingNullValues();
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig())
+                .cacheDefaults(redisCacheConfiguration)
                 .transactionAware()
                 .withInitialCacheConfigurations(Collections.singletonMap("urls", redisCacheConfiguration))
                 .build();
