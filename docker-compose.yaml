@@ -1,5 +1,5 @@
 services:
-  mongodb:
+  mongo_db:
     image: mongo:latest
     container_name: persistent_store
     environment:
@@ -54,15 +54,18 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongodb:27017/${DB_NAME}?authSource=admin
+      SPRING_MONGODB_URI: mongodb://${DB_USERNAME}:${DB_PASSWORD}@mongo_db:27017/${DB_NAME}?authSource=admin
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_USERNAME: default
       SPRING_DATA_REDIS_PASSWORD: ${CACHE_PASSWORD}
       SPRING_DATA_REDIS_DATABASE: 0
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - mongodb
-      - redis
+      mongo_db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
 
