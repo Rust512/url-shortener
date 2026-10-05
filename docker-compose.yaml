@@ -34,6 +34,8 @@ services:
   redis:
     image: redis:latest
     container_name: cache
+    labels:
+      org.springframework.boot.ignore: true
     environment:
       CACHE_PASSWORD: ${CACHE_PASSWORD}
     ports:
