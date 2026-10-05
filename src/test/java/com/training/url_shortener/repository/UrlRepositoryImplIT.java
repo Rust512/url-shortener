@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
-class UrlRepositoryImplTest {
+class UrlRepositoryImplIT {
 
     @MockitoSpyBean
     private IdGenerator idGenerator;
