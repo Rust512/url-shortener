@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.ForwardedHeaderUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
@@ -45,14 +48,11 @@ public class UrlServiceImpl implements UrlService {
         UrlMapEntry savedEntry = urlRepository.saveLongUrl(longUrl.toString());
 
         String id = savedEntry.getId();
-        return new UrlResponse(longUrl, constructShortUrl(request, id));
-    }
 
-    private URI constructShortUrl(HttpServletRequest request, String id) {
-        String appHost = request.getServerName();
-        String scheme = request.getScheme();
-        int port = request.getServerPort();
-
-        return URI.create(String.format("%s://%s:%d/%s", scheme, appHost, port, id));
+        var uri = ServletUriComponentsBuilder.fromRequest(request)
+                .replacePath(id)
+                .build()
+                .toUri();
+        return new UrlResponse(longUrl, uri);
     }
 }
