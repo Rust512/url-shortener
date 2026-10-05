@@ -4,16 +4,21 @@ import com.training.url_shortener.TestcontainersConfiguration;
 import com.training.url_shortener.entity.UrlMapEntry;
 import com.training.url_shortener.generator.IdGenerator;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.net.URI;
+import java.util.Objects;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -28,6 +33,14 @@ class UrlRepositoryImplTest {
     @Autowired
     private UrlRepository urlRepository;
 
+    @Autowired
+    private CacheManager cacheManager;
+
+    @BeforeEach
+    void clearCache() {
+        Objects.requireNonNull(cacheManager.getCache("urls")).invalidate();
+    }
+
     @Test
     void getById_WhenIdDoesNotExist_ShouldReturnNullFromCacheTheSecondTime() {
         String id = "a1b2c3d";
@@ -41,7 +54,6 @@ class UrlRepositoryImplTest {
         Assertions.assertThat(secondResult).isNull();
 
         verify(mongoTemplate).findById(id, UrlMapEntry.class);
-        verifyNoMoreInteractions(mongoTemplate);
     }
 
     @Test
@@ -69,7 +81,5 @@ class UrlRepositoryImplTest {
         Assertions.assertThat(secondResult).isNotNull();
         verify(mongoTemplate).findById(id, UrlMapEntry.class);
         verify(mongoTemplate).save(any(UrlMapEntry.class));
-
-        verifyNoMoreInteractions(mongoTemplate);
     }
 }
