@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 public class NanoIdGenerator implements IdGenerator {
     @Override
     public String generateId() {
-        return NanoIdUtils.randomNanoId(NanoIdUtils.DEFAULT_NUMBER_GENERATOR, NanoIdUtils.DEFAULT_ALPHABET, 7);
+        return NanoIdUtils.randomNanoId(
+                NanoIdUtils.DEFAULT_NUMBER_GENERATOR,
+                NanoIdUtils.DEFAULT_ALPHABET,
+                7
+        );
     }
 }
