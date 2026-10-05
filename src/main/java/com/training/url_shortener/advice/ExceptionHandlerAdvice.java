@@ -2,6 +2,7 @@ package com.training.url_shortener.advice;
 
 import com.training.url_shortener.dto.ApiErrorResponse;
 import com.training.url_shortener.exception.MissingEntryException;
+import com.training.url_shortener.exception.SelfReferenceException;
 import com.training.url_shortener.factory.ErrorMessageFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ public class ExceptionHandlerAdvice {
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
             HandlerMethodValidationException.class,
+            SelfReferenceException.class
     })
     ResponseEntity<ApiErrorResponse> handleBadRequest(Exception ex, HttpServletRequest request) {
         return ErrorMessageFactory.getApiErrorResponseEntity(ex, HttpStatus.BAD_REQUEST, request);
