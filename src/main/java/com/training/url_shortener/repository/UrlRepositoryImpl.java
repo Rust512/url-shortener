@@ -1,7 +1,7 @@
 package com.training.url_shortener.repository;
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.training.url_shortener.entity.UrlMapEntry;
+import com.training.url_shortener.generator.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,6 +16,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class UrlRepositoryImpl implements UrlRepository {
     private final MongoTemplate mongoTemplate;
+    private final IdGenerator idGenerator;
 
     @Override
     @Cacheable(value = "urls", key = "#id")
@@ -29,7 +30,7 @@ public class UrlRepositoryImpl implements UrlRepository {
         String id;
 
         do {
-            id = NanoIdUtils.randomNanoId(NanoIdUtils.DEFAULT_NUMBER_GENERATOR, NanoIdUtils.DEFAULT_ALPHABET, 7);
+            id = idGenerator.generateId();
         } while (idUsed(id));
 
         var entry = UrlMapEntry.builder()
