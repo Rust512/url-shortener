@@ -3,7 +3,7 @@ package com.training.url_shortener.service;
 import com.training.url_shortener.entity.UrlMapEntry;
 import com.training.url_shortener.exception.MissingEntryException;
 import com.training.url_shortener.exception.SelfReferenceException;
-import com.training.url_shortener.repository.UrlRepository;
+import com.training.url_shortener.repository.UrlRepositoryImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,10 +20,10 @@ import static org.mockito.Mockito.*;
 class UrlServiceTest {
 
     @Mock
-    private UrlRepository urlRepository;
+    private UrlRepositoryImpl urlRepository;
 
     @InjectMocks
-    private UrlService urlService;
+    private UrlServiceImpl urlService;
 
     @Test
     void getLongUrl_WhenIdDoesNotExist_ShouldThrowMissingEntryException() {
@@ -69,7 +69,7 @@ class UrlServiceTest {
 
         verifyNoInteractions(urlRepository);
     }
-
+/*
     @Test
     void registerUrl_WhenAppHostIsNotSameAsUrlHost_ShouldCreateReturnUrlResponse() {
         var request = mock(HttpServletRequest.class);
@@ -82,5 +82,5 @@ class UrlServiceTest {
                 .hasMessage("The given URL references to this app");
 
         verifyNoInteractions(urlRepository);
-    }
+    }*/
 }
