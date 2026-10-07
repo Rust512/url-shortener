@@ -1,26 +1,17 @@
 package com.training.url_shortener.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 
 import java.time.Instant;
 
-@Data
 @Builder
-@AllArgsConstructor
-public class ApiErrorResponse {
-    private int statusCode;
-
-    private String error;
-
-    private String exceptionName;
-
-    private String message;
-
-    private String path;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant timestamp;
+public record ApiErrorResponse(
+        int statusCode,
+        String error,
+        String exceptionName,
+        String message,
+        String path,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) Instant timestamp
+) {
 }
