@@ -3,7 +3,7 @@ package com.training.url_shortener.service;
 import com.training.url_shortener.entity.UrlMapEntry;
 import com.training.url_shortener.exception.MissingEntryException;
 import com.training.url_shortener.exception.SelfReferenceException;
-import com.training.url_shortener.repository.UrlRepositoryImpl;
+import com.training.url_shortener.repository.UrlRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class UrlServiceTest {
 
     @Mock
-    private UrlRepositoryImpl urlRepository;
+    private UrlRepository urlRepository;
 
     @InjectMocks
     private UrlServiceImpl urlService;
@@ -69,18 +69,33 @@ class UrlServiceTest {
 
         verifyNoInteractions(urlRepository);
     }
-/*
+
     @Test
     void registerUrl_WhenAppHostIsNotSameAsUrlHost_ShouldCreateReturnUrlResponse() {
         var request = mock(HttpServletRequest.class);
-        var longUrl = URI.create("http://localhost:8080");
+        var longUrl = URI.create("https://host/path");
+        var id = "ab12de3";
+        var entry = UrlMapEntry.builder()
+                .id(id)
+                .longUrl(longUrl)
+                .build();
 
-        when(request.getServerName()).thenReturn("host");
+        when(request.getServerName()).thenReturn("short-host");
+        when(request.getScheme()).thenReturn("https");
+        when(request.getServerPort()).thenReturn(443);
 
-        Assertions.assertThatThrownBy(() -> urlService.registerUrl(request, longUrl))
-                .isInstanceOf(SelfReferenceException.class)
-                .hasMessage("The given URL references to this app");
+        when(urlRepository.saveLongUrl(longUrl.toString())).thenReturn(entry);
 
-        verifyNoInteractions(urlRepository);
-    }*/
+        var result = urlService.registerUrl(request, longUrl);
+
+        Assertions.assertThat(result)
+                .isNotNull();
+        Assertions.assertThat(result.longUrl())
+                .isEqualByComparingTo(longUrl);
+        Assertions.assertThat(result.shortUrl())
+                .isEqualByComparingTo(URI.create(String.format("https://short-host/%s", id)));
+
+        verify(urlRepository).saveLongUrl(longUrl.toString());
+        verifyNoMoreInteractions(urlRepository);
+    }
 }
