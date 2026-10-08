@@ -1,74 +1,91 @@
 package com.training.url_shortener.controller;
 
+import com.training.url_shortener.TestcontainersConfiguration;
 import com.training.url_shortener.dto.UrlRequest;
-import com.training.url_shortener.exception.MissingEntryException;
-import com.training.url_shortener.exception.SelfReferenceException;
-import com.training.url_shortener.service.UrlService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.training.url_shortener.dto.UrlResponse;
+import com.training.url_shortener.entity.UrlMapEntry;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.test.web.servlet.client.RestTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.net.URI;
 
-@WebMvcTest(ShortenerController.class)
+@AutoConfigureRestTestClient
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ShortenerControllerIT {
 
     @Autowired
-    private MockMvc mockMvc;
+    private RestTestClient restTestClient;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MongoTemplate mongoTemplate;
 
-    @MockitoBean
-    private UrlService urlService;
-
-    @Test
-    void redirect_WhenMissingUrlExceptionIsThrown_ShouldReturnStatus404() throws Exception {
-        var id = "a1b8c3d";
-
-        var ex = new MissingEntryException(id);
-        when(urlService.getLongUrl(id)).thenThrow(ex);
-
-        var path = String.format("/%s", id);
-        mockMvc.perform(get("/{id}", id))
-                .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
-                .andExpect(jsonPath("$.exceptionName").value(ex.getClass().getSimpleName()))
-                .andExpect(jsonPath("$.path").value(path))
-                .andExpect(jsonPath("$.message").isNotEmpty());
-
-        verify(urlService).getLongUrl(id);
-        verifyNoMoreInteractions(urlService);
+    @AfterEach
+    void afterEachTest() {
+        mongoTemplate.remove(new Query(), UrlMapEntry.class);
     }
 
     @Test
-    void getShortUrl_WhenSelfReferenceExceptionIsThrow_ShouldReturnStatus400() throws Exception {
-        var urlRequest = new UrlRequest("https://example.com");
+    void redirect_WhenIdExists_ShouldReturnCorrespondingLongUrl() {
+        // pre-populate data
+        var id = "d1e2f3u";
+        var longUrl = URI.create("https://something/path");
+        var entry = UrlMapEntry.builder()
+                .id(id)
+                .longUrl(longUrl)
+                .build();
+        mongoTemplate.save(entry);
 
-        var ex = new SelfReferenceException();
-        when(urlService.registerUrl(any(HttpServletRequest.class), eq(urlRequest.toUri())))
-                .thenThrow(ex);
+        // call API and verify result.
+        var requestUri = UriComponentsBuilder.fromUriString("/{id}")
+                .buildAndExpand(id)
+                .toUri();
 
-        var path = "/v1/api/shorten";
-        mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(urlRequest)))
-                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
-                .andExpect(jsonPath("$.exceptionName").value(ex.getClass().getSimpleName()))
-                .andExpect(jsonPath("$.path").value(path))
-                .andExpect(jsonPath("$.message").isNotEmpty());
+        var response = restTestClient.get()
+                .uri(requestUri)
+                .exchange()
+                .expectStatus().isFound()
+                .expectHeader().location(longUrl.toString())
+                .returnResult();
 
-        verify(urlService).registerUrl(any(HttpServletRequest.class), eq(urlRequest.toUri()));
-        verifyNoMoreInteractions(urlService);
+        Assertions.assertThat(response)
+                .isNotNull();
+    }
+
+    @Test
+    void getShortUrl_WithValidRequest_ShouldRegisterUrl() {
+        // no need to pre-populate data, just call the API and verify the result.
+        var longUrl = URI.create("https://something-else/different-path");
+        var urlRequest = new UrlRequest(longUrl.toString());
+
+        var response = restTestClient.post()
+                .uri("/v1/api/shorten")
+                .body(urlRequest)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(UrlResponse.class)
+                .getResponseBody();
+
+        Assertions.assertThat(response)
+                .isNotNull();
+
+        var responseLongUrl = response.longUrl();
+        var shortUrl = response.shortUrl();
+
+        Assertions.assertThat(responseLongUrl)
+                .isNotNull();
+        Assertions.assertThat(shortUrl)
+                .isNotNull();
     }
 }
